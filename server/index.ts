@@ -11,7 +11,6 @@ const app = express();
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
-
 // Routes
 app.get('/api/posts', (req, res) => {
   res.json({ data: postsManager.getPaidPosts() });
@@ -22,24 +21,27 @@ app.get('/api/posts/:id', (req, res) => {
   if (post) {
     res.json({ data: post });
   } else {
-    res.status(404).json({ error: `No post found with ID ${req.params.id}`});
+    res.status(404).json({ error: `No post found with ID ${req.params.id}` });
   }
 });
 
 app.post('/api/posts', async (req, res, next) => {
   try {
     const { name, content } = req.body;
+    console.log(name, content);
 
     if (!name || !content) {
       throw new Error('Fields name and content are required to make a post');
     }
 
     const post = postsManager.addPost(name, content);
+    console.log('posts', post)
     const invoice = await node.addInvoice({
       memo: `Lightning Posts post #${post.id}`,
       value: content.length,
       expiry: '120', // 2 minutes
     });
+
 
     res.json({
       data: {
@@ -47,15 +49,16 @@ app.post('/api/posts', async (req, res, next) => {
         paymentRequest: invoice.paymentRequest,
       },
     });
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
 });
 
 app.get('/', (req, res) => {
-  res.send('You need to load the webpack-dev-server page, not the server page!');
+  res.send(
+    'You need to load the webpack-dev-server page, not the server page!'
+  );
 });
-
 
 // Initialize node & server
 console.log('Initializing Lightning node...');
@@ -68,7 +71,7 @@ initNode().then(() => {
 
   // Subscribe to all invoices, mark posts as paid
   const stream = node.subscribeInvoices() as any as Readable<Invoice>;
-  stream.on('data', chunk => {
+  stream.on('data', (chunk) => {
     // Skip unpaid / irrelevant invoice updates
     if (!chunk.settled || !chunk.amtPaidSat || !chunk.memo) return;
 

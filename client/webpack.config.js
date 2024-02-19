@@ -58,7 +58,7 @@ module.exports = {
   mode: 'development',
   name: 'main',
   target: 'web',
-  devtool: 'cheap-module-inline-source-map',
+  devtool: 'inline-cheap-module-source-map',
   entry: path.join(clientDir, 'index.tsx'),
   output: {
     path: path.join(serverDir, 'public'),
@@ -82,6 +82,6 @@ module.exports = {
   devServer: {
     port: 3000,
     hot: true,
-    stats: 'minimal',
+    // stats: 'minimal',
   },
 };
